@@ -1,0 +1,264 @@
+package com.kosta.sample.board;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.sql.DataSource;
+
+import com.kosta.sample.common.MyOracleConnection;
+
+import oracle.jdbc.pool.OracleConnectionPoolDataSource;
+
+public class BoardDAO {
+
+	public BoardVO boardReplySelect(int seq){
+		BoardVO bvo = new BoardVO();
+		
+		// cpr 선언
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		// 연결
+		MyOracleConnection oc = new MyOracleConnection();
+		conn = oc.oracleConn();
+		// sql문 입력/실행
+		String sql = "select b.seq, b.title, b.contents, b.regid, b.regdate, "
+				+ "r.rseq , r.reply, r.regid as rregid, r.regdate as rregdate "
+				+ "from board b, reply r "
+				+ "where b.seq=? and b.seq = r.seq(+) order by r.seq desc";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, seq);
+			rs = pstmt.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		// bvo에 데이터 받기
+		List<ReplyVO> rlist = new ArrayList<ReplyVO>();
+		try {
+			while (rs.next()) {
+					bvo.setSeq(rs.getInt("seq"));
+					bvo.setTitle(rs.getString("title"));
+					bvo.setContents(rs.getString("contents"));
+					bvo.setRegId(rs.getString("regid"));
+					bvo.setRegdate(rs.getString("regdate"));
+					// replies 담을 list 만들기 
+
+					ReplyVO rvo = new ReplyVO();
+					rvo.setRseq(rs.getInt("rseq"));
+					rvo.setReply(rs.getString("reply"));
+					rvo.setRegid(rs.getString("rregid"));
+					rvo.setRegdate(rs.getString("rregdate"));
+					rlist.add(rvo);
+				}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		bvo.setReplies(rlist);
+
+		return bvo;
+	}
+
+	
+	public ArrayList<BoardVO> selectBoard(){
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		MyOracleConnection oc = new MyOracleConnection();
+		try {
+			conn = oc.oracleConn();
+			String str = "select * from board";
+			pstmt = conn.prepareStatement(str);
+			rs = pstmt.executeQuery();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			oc.closeConn(conn, pstmt, rs);
+		}
+		
+		ArrayList<BoardVO> list = new ArrayList<BoardVO>();
+		
+		try {
+			while(rs.next()) {
+				BoardVO bvo = new BoardVO();
+				bvo.setSeq(rs.getInt("seq"));
+				bvo.setTitle(rs.getString("title"));
+				bvo.setContents(rs.getString("contents"));
+				bvo.setRegId(rs.getString("regID"));
+				bvo.setRegdate(rs.getString("regDate"));
+				list.add(bvo);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			oc.closeConn(conn, pstmt, rs);
+		}
+		return list;		
+	}
+	
+	
+	public BoardVO selectBoardOne(int seq){
+		MyOracleConnection oc = new MyOracleConnection();
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String str = null;
+		
+		try {
+			conn = oc.oracleConn(); 
+			str = "select * from board where seq = ?";
+			
+			pstmt = conn.prepareStatement(str);
+			pstmt.setInt(1, seq);
+			rs = pstmt.executeQuery();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			oc.closeConn(conn, pstmt, rs);
+		}
+		
+		BoardVO bvo = new BoardVO();
+		try {
+			rs.next();
+			bvo.setSeq(rs.getInt("seq"));
+			bvo.setTitle(rs.getString("title"));
+			bvo.setContents(rs.getString("contents"));
+			bvo.setRegId(rs.getString("regID"));
+			bvo.setRegdate(rs.getString("regDate"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			oc.closeConn(conn, pstmt, rs);
+		}
+		return bvo;
+	}
+
+	
+	public List<ReplyVO> replySelect(int seq){
+			Connection conn = null;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			
+			MyOracleConnection oc = new MyOracleConnection();
+			try {
+				conn = oc.oracleConn();
+				String str = "select * from reply where seq = ? order by rseq desc";
+				pstmt = conn.prepareStatement(str);
+				pstmt.setInt(1, seq);
+				rs = pstmt.executeQuery();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				oc.closeConn(conn, pstmt, rs);
+			}
+			
+			ArrayList<ReplyVO> list = new ArrayList<ReplyVO>();
+			
+			try {
+				while(rs.next()) {
+					ReplyVO rvo = new ReplyVO();
+					rvo.setSeq(rs.getInt("seq"));
+					rvo.setReply(rs.getString("title"));
+					rvo.setRegid(rs.getString("regID"));
+					rvo.setRegdate(rs.getString("regDate"));
+					list.add(rvo);
+				}
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				oc.closeConn(conn, pstmt, rs);
+			}
+			return list;
+	}
+		
+	void deleteBoard(int seq) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		MyOracleConnection oc = new MyOracleConnection();
+		
+		try {
+			conn = oc.oracleConn();
+
+			String str = "delete from board where seq = ?";
+			pstmt = conn.prepareStatement(str);
+			pstmt.setInt(1, seq);
+			
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			oc.closeConn(conn, pstmt);
+		}		
+	}
+	
+	public int boardInsert(String title, String contents, String regId) {
+		//seq       *title *contents *regid            regdate
+		//nextval                    session,cookies   sysdate
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		MyOracleConnection oc = new MyOracleConnection();
+		int insertRows = 0;
+		
+		conn = oc.oracleConn();
+		String sql = "insert into board values(board_seq.nextval,?,?,?,sysdate)";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, title);
+			pstmt.setString(2, contents);
+			pstmt.setString(3, regId);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	finally {
+			oc.closeConn(conn, pstmt);
+		}
+		
+		
+		
+		return insertRows;
+	}
+	
+	public int boardUpdate(BoardVO bvo) {
+		//seq       *title *contents *regid            regdate
+		//nextval                    session,cookies   sysdate
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		MyOracleConnection oc = new MyOracleConnection();
+		int updateRows = 0;
+		
+		conn = oc.oracleConn();
+		String sql = "update board set title=?, contents=? where seq=?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, bvo.getTitle());
+			pstmt.setString(2, bvo.getContents());
+			pstmt.setInt(3, bvo.getSeq());
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	finally {
+			oc.closeConn(conn, pstmt);
+		}
+		
+		
+		
+		return updateRows;
+	}
+	
+	
+}

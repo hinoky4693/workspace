@@ -1,0 +1,78 @@
+package com.kosta.sample.board;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import oracle.jdbc.internal.StateSignatures;
+
+@WebServlet("/BoardServlet")
+public class BoardServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+    public BoardServlet() {
+    }
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		BoardDAO dao = new BoardDAO();
+		
+		if (request.getParameter("pagecode").equals("B001")){
+			ArrayList<BoardVO> list = dao.boardSelect();
+			
+			request.setAttribute("KEY_BOARDLIST", list);
+			RequestDispatcher rd = request.getRequestDispatcher("tables.jsp");
+			rd.forward(request, response);
+		} else if (request.getParameter("pagecode").equals("B002")){
+			BoardVO bvo = dao.boardSelectOne(Integer.parseInt(request.getParameter("AAAseq")));
+			
+			request.setAttribute("KEY_BOARDVO", bvo);
+			RequestDispatcher rd = request.getRequestDispatcher("tables_detail.jsp");
+			rd.forward(request, response);
+		}
+		
+		
+		
+		
+		
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		BoardDAO dao = new BoardDAO();
+		BoardVO bvo = new BoardVO();
+		
+		
+		if(request.getParameter("pagecode").equals("B003")) {
+			
+			bvo.setSeq(Integer.parseInt(request.getParameter("seq")));
+			bvo.setTitle(request.getParameter("title"));
+			bvo.setContents(request.getParameter("contents"));
+			
+			int updateRows = dao.boardUpdate(bvo);
+			
+			if (updateRows>=1) {
+				response.sendRedirect(request.getContextPath() + "/BoardServlet?AAAseq="+Integer.parseInt(request.getParameter("seq"))+"&pagecode=B002");
+			} else {
+				response.sendRedirect("500.html");
+			}
+
+		} else if(request.getParameter("pagecode").equals("B004")) {
+
+			bvo.setSeq(Integer.parseInt(request.getParameter("seq")));
+			int deleteRows = dao.boardDelete(Integer.parseInt(request.getParameter("seq")));
+			
+			
+			if (deleteRows>=1) {
+				response.sendRedirect(request.getContextPath() + "/BoardServlet?pagecode=B001");
+			} else {
+				response.sendRedirect("500.html");
+			}
+		} 
+		System.out.println("====method : POST====");			
+	}
+
+}
