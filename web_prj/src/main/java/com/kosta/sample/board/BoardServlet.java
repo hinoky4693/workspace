@@ -19,6 +19,10 @@ public class BoardServlet extends HttpServlet {
 	public BoardServlet() {
 	}
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=UTF-8");
+		
+		
 		BoardDAO dao = new BoardDAO();
 
 		if (request.getParameter("pagecode").equals("B001")){
@@ -58,6 +62,10 @@ public class BoardServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=UTF-8");
+		
+		
 		BoardDAO dao = new BoardDAO();
 		BoardVO bvo = new BoardVO();
 		ReplyVO rvo = new ReplyVO();
