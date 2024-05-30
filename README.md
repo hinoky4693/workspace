@@ -4,9 +4,9 @@
 3. 아래와 같이 초기설정을 진행한다.
 ```
 $ git init
-$ git config --global user.name hinoky4693 # username설정
-$ git config --global user.email roghk1204@naver.com # github email 추가
-$ git remote add origin https://github.com/hinoky4693/TIL.git
+$ git config user.name hinoky4693 # username설정
+$ git config user.email roghk1204@naver.com # github email 추가
+$ git remote add origin https://github.com/hinoky4693/workspace.git
 ```
 4. 파일 추가 후 올리는 법(연결된 폴더 제일 상단에서 진행)
 ```
