@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="java.util.ArrayList"%>
-<%@ page import="com.kosta.sample.board.BoardVO"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> 
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt"  prefix="fmt"%> 
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -18,7 +19,7 @@
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
             <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+            <a class="navbar-brand ps-3" href="index.">Start Bootstrap</a>
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
             <!-- Navbar Search-->
@@ -77,17 +78,15 @@
                                     <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
                                         <nav class="sb-sidenav-menu-nested nav">
                                             <a class="nav-link" href="login.html">Login</a>
-<%
-String userid = (String)session.getAttribute("KEY_SESS_USERID");
-String uname = (String)session.getAttribute("KEY_SESS_UNAME");
-String grade = (String)session.getAttribute("KEY_SESS_GRADE");
-
-if(grade != null){	
-%>
-        <a class="nav-link" href="<%=request.getContextPath()%>/UserServlet">Logout</a>
-<%} else { %>        
-        <a class="nav-link" href="<%=request.getContextPath()%>/login.jsp">Login</a>
-<%} %>        
+       
+<c:choose>
+    <c:when test="${grade != null}">
+        <a class="nav-link" href="${pageContext.request.contextPath}/UserServlet">Logout</a>
+    </c:when>
+    <c:otherwise>
+        <a class="nav-link" href="${pageContext.request.contextPath}/login.jsp">Login</a>
+    </c:otherwise>
+</c:choose>
                                             
                                             <a class="nav-link" href="register.html">Register</a>
                                             <a class="nav-link" href="password.html">Forgot Password</a>
@@ -111,7 +110,7 @@ if(grade != null){
                                 <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                                 Charts
                             </a>
-      <a class="nav-link" href="<%=request.getContextPath()%>/BoardServlet">
+      <a class="nav-link" href="${pageContext.request.contextPath}/BoardServlet">
       <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
       Tables
       
@@ -128,17 +127,18 @@ if(grade != null){
                 <main>
                     <div class="container-fluid px-4">
                         <h1 class="mt-4">Tables</h1>
-<%
-if(grade != null){
-	out.println(uname + "님 환영합니다.");
-	if(grade.equals("u")) {
-		out.println("사용자접속");
-	} else if(grade.equals("a")) {
-		out.println("관리자접속");
-	}	
-}
-%>
-                        
+
+<c:if test="${sessionScope.KEY_SESS_GRADE != null} ">
+${sessionScope.KEY_SESS_UNAME}님 환영합니다.
+	<c:choose>
+	    <c:when test="${sessionScope.KEY_SESS_GRADE == 'u'}">
+	        사용자접속
+	    </c:when>
+	     <c:when test="${sessionScope.KEY_SESS_GRADE == 'a'}">
+	        관리자접속
+	    </c:when>
+	</c:choose>
+</c:if>
                         
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
@@ -155,6 +155,7 @@ if(grade != null){
                             <div class="card-header">
                                 <i class="fas fa-table me-1"></i>
                                 DataTable Example
+                                총 : ${fn:length(KEY_BOARDLIST)} 건
                             </div>
                             <div class="card-body">
                                 <table id="datatablesSimple">
@@ -175,26 +176,18 @@ if(grade != null){
                                         </tr>
                                     </tfoot>
                                     <tbody>
-<%
-      ArrayList<BoardVO> list = (ArrayList<BoardVO>)request.getAttribute("KEY_BOARDLIST");
-      out.println("총 : " + list.size());
-      for(BoardVO bvo : list) {
-    	 	int seq 		= bvo.getSeq();
-     	  	String title 	= bvo.getTitle();
-     	 	String contents = bvo.getContents();
-     		String regid 	= bvo.getRegid();
-     		String regdate 	= bvo.getRegdate();
-//	 		out.println(seq + "\t" + title + "\t" + contents + "\t" + title + "\t" + regid + "\t" + regdate);
-	%>
+                                    
+
+<c:forEach items="${KEY_BOARDLIST}" var="bvo">
 	
          <tr>
-             <td><%=bvo.getSeq()%></td>
-             <td><a href="<%=request.getContextPath()%>/BoardServlet?seq=<%=seq%>&pagecode=B002"><%=title%></a></td>
-             <td><%=regid%></td>
-             <td><%=regdate%></td>
+             <td>${bvo.seq}</td>
+             <td><a href="${pageContext.request.contextPath}/BoardServlet?seq=${bvo.seq}&pagecode=B002">${bvo.title}</a></td>
+             <td>${bvo.regid}</td>
+             <td>${bvo.regdate}</td>
          </tr>
+</c:forEach>
 	
-	<% } %>
 
                                     </tbody>
                                 </table>
